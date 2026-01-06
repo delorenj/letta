@@ -41,6 +41,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LETTA_SANDBOX_MOUNT_PATH=/root/.letta/tool_execution_dir
     volumes:
       - ~/.letta/config.yaml:/root/.letta/config # config file
       - ~/.letta/credentials:/root/.letta/credentials # credentials file

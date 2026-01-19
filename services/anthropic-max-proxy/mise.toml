@@ -1,0 +1,39 @@
+[tools]
+python = "3.12"
+uv = "latest"
+
+[tasks.install]
+description = "Install dependencies"
+run = "uv pip install -e ."
+
+[tasks.dev]
+description = "Run proxy in development mode"
+run = "uv run python -m anthropic_max_proxy.main"
+
+[tasks.auth]
+description = "Start OAuth flow (prints URL to visit)"
+run = "curl -s http://localhost:8100/auth/start | python -m json.tool"
+
+[tasks.callback]
+description = "Complete OAuth with code (usage: mise run callback CODE)"
+run = """
+curl -s -X POST http://localhost:8100/auth/callback \
+  -H 'Content-Type: application/json' \
+  -d "{\"code\": \"$1\"}" | python -m json.tool
+"""
+
+[tasks.status]
+description = "Check authentication status"
+run = "curl -s http://localhost:8100/auth/status | python -m json.tool"
+
+[tasks.test-chat]
+description = "Test chat completion"
+run = """
+curl -s -X POST http://localhost:8100/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "claude-sonnet-4",
+    "messages": [{"role": "user", "content": "Hello! Say hi in exactly 5 words."}],
+    "max_tokens": 50
+  }' | python -m json.tool
+"""

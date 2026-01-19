@@ -38,22 +38,39 @@ services:
     environment:
       - LETTA_PG_URI=${LETTA_PG_URI:-postgresql://${LETTA_PG_USER:-letta}:${LETTA_PG_PASSWORD:-letta}@${LETTA_DB_HOST:-letta_db}:${LETTA_PG_PORT:-5432}/${LETTA_PG_DB:-letta}}
       - LETTA_DEBUG=True
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_KEY=${OPENROUTER_API_KEY_LETTA}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - LETTA_SANDBOX_MOUNT_PATH=/root/.letta/tool_execution_dir
     volumes:
       - ~/.letta/config.yaml:/root/.letta/config # config file
       - ~/.letta/credentials:/root/.letta/credentials # credentials file
-      # Uncomment this line to mount a local directory for tool execution, and specify the mount path
-      # before running docker compose: `export LETTA_SANDBOX_MOUNT_PATH=$PWD/directory`
-      - ${LETTA_SANDBOX_MOUNT_PATH:?}:/root/.letta/tool_execution_dir # mounted volume for tool execution
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.letta.rule=Host(`letta.delo.sh`)"
       - "traefik.http.routers.letta.entrypoints=websecure"
       - "traefik.http.routers.letta.tls.certresolver=letsencrypt"
       - "traefik.http.services.letta.loadbalancer.server.port=8283"
+      - "traefik.docker.network=proxy"
+  anthropic_max_proxy:
+    container_name: anthropic_max_proxy
+    build:
+      context: services/anthropic-max-proxy
+      dockerfile: Dockerfile
+    networks:
+      - proxy
+    ports:
+      - "8100:8100"
+    volumes:
+      # Persist OAuth tokens across restarts
+      - ~/.config/anthropic-max-proxy:/root/.config/anthropic-max-proxy
+    environment:
+      - ANTHROPIC_PROXY_LOG_LEVEL=INFO
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.anthropic-proxy.rule=Host(`anthropic-proxy.delo.sh`)"
+      - "traefik.http.routers.anthropic-proxy.entrypoints=websecure"
+      - "traefik.http.routers.anthropic-proxy.tls.certresolver=letsencrypt"
+      - "traefik.http.services.anthropic-proxy.loadbalancer.server.port=8100"
       - "traefik.docker.network=proxy"
 #  letta_nginx:
 #    hostname: letta-nginx

@@ -63,7 +63,7 @@ echo "Database migration completed successfully."
 
 # Set permissions for tool execution directory if configured
 if [ -n "$LETTA_SANDBOX_MOUNT_PATH" ]; then
-    if ! chmod 777 "$LETTA_SANDBOX_MOUNT_PATH"; then
+    if ! chmod 755 "$LETTA_SANDBOX_MOUNT_PATH"; then
         echo "ERROR: Failed to set permissions for tool execution directory at: $LETTA_SANDBOX_MOUNT_PATH"
         echo "Please check that the directory exists and is accessible"
         exit 1
